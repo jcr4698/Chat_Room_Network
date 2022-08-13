@@ -1,12 +1,12 @@
 /*
  * Chat Room Command.java
- * Chat Room Server
+ * Chat Room Client
  * Jan Rubio
  * jcr4698
  * Summer 2021
  */
 
-package server;
+package client;
 
 public class Command {
 	String command;
