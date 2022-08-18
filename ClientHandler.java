@@ -46,7 +46,10 @@ public class ClientHandler implements Runnable, Observer {
 	protected void sendToClient(String message) {
 		Gson gsonMessage = new Gson();
 		Command cmd = gsonMessage.fromJson(message, Command.class);
-		System.out.println("Sending to client "+ port + ": " + cmd.input);
+		if(user.equals(""))
+			System.out.println("Sending to client " + port + ": \"" + cmd.input + "\"");
+		else
+			System.out.println("Sending to " + user + ": \"" + cmd.input + "\"");
 		toClient.println(message);
 		toClient.flush();
 	}
@@ -66,6 +69,7 @@ public class ClientHandler implements Runnable, Observer {
 					if(server.loginAttempt(cmd.username, cmd.password)) { // attempt passed
 						user = cmd.username;
 						cmd = new Command("login successful", "login");
+						cmd.username = user;
 						gsonMessage = new Gson();
 						sendToClient(gsonMessage.toJson(cmd));
 					}
@@ -90,24 +94,23 @@ public class ClientHandler implements Runnable, Observer {
 				else if(cmd.command.equals("message")) { // message command
 					Command cmdSend = new Command(cmd.input, cmd.command);
 					Gson gsonMessageSend = new Gson();
-					if(user.equals("")) {
-						server.processMessage(gsonMessageSend.toJson(cmdSend), "");
-					}
-					else {
-						server.processMessage(gsonMessageSend.toJson(cmdSend), user);
+					if(!user.equals("") && (cmd.username != null) && !cmd.username.equals("")) {
+						server.processMessage(gsonMessageSend.toJson(cmdSend), cmd.username);
 					}
 				}
 				else if(cmd.command.equals("logout")) { // logout command
-					user = cmd.input; // user field is empty
+					user = ""; // user field is empty
 					cmd = new Command("logout", "logout");
 					gsonMessage = new Gson();
 					sendToClient(gsonMessage.toJson(cmd));
 				}
-				
 			}
 			clientSocket.close();
 		} catch(IOException e) {
-			
+			if(!user.equals(""))
+				System.out.println(user + " left. (port " + port + ")");
+			else
+				System.out.println("Port " + port + " left.");
 		}
 	}
 

@@ -66,24 +66,21 @@ public class Server extends Observable{
 		}
 	}
 	
-	protected String processMessage(String gsonMessage, String speaker) {
-		String output = "";
+	protected void processMessage(String gsonMessage, String speaker) {
 		try {
 			// message to gson
 			Gson gson = new Gson();
 			Command cmd = gson.fromJson(gsonMessage, Command.class);
 			cmd.input = speaker + ": " + cmd.input;
 			
-			// determine output
-			output = gson.toJson(cmd);
+			System.out.println(gson.toJson(cmd));
 			
 			// notify all clients
 			this.setChanged();
-			this.notifyObservers(output);
+			this.notifyObservers(gson.toJson(cmd));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return output;
 	}
 	
 	protected boolean loginAttempt(String username, String password) {
