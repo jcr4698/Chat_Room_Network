@@ -169,10 +169,22 @@ public class Client extends Application{
 								Platform.runLater(new Runnable() {
 									@Override
 									public void run() {
+										clientUsername = cmd.username;
 										makeChatRoom();
 									}
 								});
 							}
+						}
+						else if(cmd.command.equals("logout")) {
+							Platform.runLater(new Runnable() {
+								@Override
+								public void run() {
+									clientUsername = "";
+									clientPassword = "";
+									window.setScene(makeLoginScene());
+									loginHandler(); // event handler
+								}
+							});
 						}
 					}
 				} catch(IOException e) {
@@ -203,7 +215,7 @@ public class Client extends Application{
 	public void start(Stage primaryStage) throws Exception {
 		// initialize stage
 		window = primaryStage;
-		window.setTitle("Chat Room - login");
+//		window.setTitle("Chat Room - login");
 
 		// Initialize primary condition of primaryStage
 		
@@ -217,6 +229,9 @@ public class Client extends Application{
 	}		
 	
 	private Scene makeLoginScene() { // initialize login window
+		// Login window registration
+		window.setTitle("Chat Room - login");
+		
 		// grid1 scene format
 		grid1 = new GridPane();
 		grid1.setPadding(new Insets(10, 10, 10, 10));
@@ -315,6 +330,9 @@ public class Client extends Application{
 	}
 	
 	private void makeRegisterScene() {
+		// Registration window title
+		window.setTitle("Chat Room - Registration");
+		
 		// grid1 scene format
 		grid3 = new GridPane();
 		grid3.setPadding(new Insets(10, 10, 10, 10));
@@ -367,39 +385,47 @@ public class Client extends Application{
 	}
 	
 	private void makeChatRoom() {
+		// Chat Room window title
+		window.setTitle("Chat Room - Welcome, " + username.getText() + "!");
+		
 		// grid2 scene format
 		grid2 = new GridPane();
 		grid2.setPadding(new Insets(10, 10, 10, 10));
 		grid2.setVgap(10);
 		grid2.setHgap(10);
 		
-		// username label
-		welcomeUser = new Label("Welcome " + username.getText());
-		GridPane.setConstraints(welcomeUser, 0, 0);
-		
 		// logout button
 		logoutBtn = new Button("logout");
-		GridPane.setConstraints(logoutBtn, 3, 0);
+		GridPane.setRowIndex(logoutBtn, 0);
+		GridPane.setColumnIndex(logoutBtn, 0);
+		
+		// username label
+		welcomeUser = new Label("~Chat~");
+		GridPane.setRowIndex(welcomeUser, 1);
+		GridPane.setColumnIndex(welcomeUser, 0);
 		
 		// chat window
-		chatDisplay = new TextArea("~Chat~\n");
-		GridPane.setRowIndex(chatDisplay, 1);
-		GridPane.setRowSpan(chatDisplay, 6);
-	    GridPane.setColumnSpan(chatDisplay, 3);
+		chatDisplay = new TextArea();
+		GridPane.setRowIndex(chatDisplay, 2);
+		GridPane.setRowSpan(chatDisplay, 4);
+	    GridPane.setColumnSpan(chatDisplay, 4);
+//		GridPane.setFillWidth(chatDisplay, true);
 		chatDisplay.setPrefHeight(300.0);
 	    chatDisplay.setEditable(false);
 	    
 	    // message window
 	    textDisplay = new TextArea();
-	    GridPane.setRowIndex(textDisplay, 7);
+	    GridPane.setRowIndex(textDisplay, 6);
+	    GridPane.setRowSpan(textDisplay, 4);
+	    GridPane.setColumnSpan(textDisplay, 4);
 //	    GridPane.setFillWidth(textDisplay, true);
-	    textDisplay.setPrefHeight(75.0);
+	    textDisplay.setPrefHeight(100.0);
 		
 		// put labels, buttons, and text fields in grid
 	    grid2.getChildren().addAll(welcomeUser, logoutBtn, chatDisplay, textDisplay);
 	    
 	    // fill stage with scene
-	    window.setScene(new Scene(grid2, 400, 500));
+	    window.setScene(new Scene(grid2, 500, 500));
 	    
 	    // start handler
 	    chatHandler();
@@ -413,6 +439,27 @@ public class Client extends Application{
 		});
 		
 		// logout button
+		logoutBtn.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				Gson gsonMessage = new Gson();
+				cmd.command = "logout";
+				sendToServer(gsonMessage.toJson(cmd));
+			}
+		});
 		
+		// chat button
+		textDisplay.setOnKeyPressed(e -> { // at "sendToServer" it erases clientUsername for some reason!
+			if(e.getCode() == KeyCode.ENTER) {
+				String message = textDisplay.getText().trim();
+				if(!message.equals("")) {
+					Gson gsonMessage = new Gson();
+					cmd.username = clientUsername;
+					cmd.command = "message";
+					cmd.input = message;
+					sendToServer(gsonMessage.toJson(cmd)); // register button
+				}
+			}
+		});
 	}
 }
