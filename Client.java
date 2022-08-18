@@ -175,7 +175,16 @@ public class Client extends Application{
 								});
 							}
 						}
-						else if(cmd.command.equals("logout")) {
+						else if(cmd.command.equals("message")) { // message command
+							Platform.runLater(new Runnable() {
+								@Override
+								public void run() {
+									chatDisplay.appendText(cmd.input + "\n");
+									textDisplay.clear();
+								}
+							});
+						}
+						else if(cmd.command.equals("logout")) { // logout command
 							Platform.runLater(new Runnable() {
 								@Override
 								public void run() {
