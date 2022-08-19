@@ -1,4 +1,4 @@
-# Chat Room: In progress
+# Chat Room
 
 A server-client network that allows users to communicate with each other no matter where they are located.
 
